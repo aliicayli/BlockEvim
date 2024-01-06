@@ -35,7 +35,7 @@ class LifeMeaningProvider extends ChangeNotifier{
     });
 
     final abiStringFile = await DefaultAssetBundle.of(context)
-        .loadString("build/contracts/LifeMeaning.json");
+        .loadString("truffle-artifacts/LifeMeaning.json");
     
     final abiJson = jsonDecode(abiStringFile);
     final abi = jsonEncode(abiJson["abi"]);
@@ -45,10 +45,10 @@ class LifeMeaningProvider extends ChangeNotifier{
     contract = DeployedContract(ContractAbi.fromJson(abi, contractName), contractAdress);
     getLifeMeaning = contract.function("get");
     setLifeMeaning = contract.function("set");
-    getMeaning();
+    getText();
   }
   
-  Future<void> getMeaning() async{
+  Future<void> getText() async{
     final result = await client.call(
         contract: contract,
         function: getLifeMeaning,
@@ -71,7 +71,7 @@ class LifeMeaningProvider extends ChangeNotifier{
         )
     );
 
-    getMeaning();
+    getText();
   }
 
 
