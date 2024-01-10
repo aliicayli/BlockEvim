@@ -8,11 +8,15 @@ import 'package:web_socket_channel/io.dart';
 class LifeMeaningProvider extends ChangeNotifier{
 
   static const String contractName ="LifeMeaning";
-  static const String ip ="192.168.243.168";
-  static const String port ="7545";
-  static const String rpcUrl ="http://$ip:$port";
-  static const String wsUrl ="ws://$ip:$port";
-  static const String privateKey ="0x391a28f5fc5dc9571180c2016e040bece86716b36f563cfb2617090a74993d8c";
+  // static const String ip ="192.168.243.168";
+  // static const String port ="7545";
+  // static const String rpcUrl ="http://$ip:$port";
+  // static const String wsUrl ="ws://$ip:$port";
+
+  static const String rpcUrl ="http://10.0.2.2:7545";
+  static const String wsUrl ="ws://10.0.2.2:7545/";
+
+  static const String privateKey ="391a28f5fc5dc9571180c2016e040bece86716b36f563cfb2617090a74993d8c";
 
 
   late Web3Client client;
@@ -34,8 +38,7 @@ class LifeMeaningProvider extends ChangeNotifier{
       return IOWebSocketChannel.connect(wsUrl).cast<String>();
     });
 
-    final abiStringFile = await DefaultAssetBundle.of(context)
-        .loadString("truffle-artifacts/LifeMeaning.json");
+    final abiStringFile = await DefaultAssetBundle.of(context).loadString("truffle-artifacts/LifeMeaning.json");
     
     final abiJson = jsonDecode(abiStringFile);
     final abi = jsonEncode(abiJson["abi"]);
@@ -47,19 +50,29 @@ class LifeMeaningProvider extends ChangeNotifier{
     setLifeMeaning = contract.function("set");
     getText();
   }
-  
-  Future<void> getText() async{
-    final result = await client.call(
+
+  Future<void> getText() async {
+    try {
+      print('Before calling client.call');
+      final result = await client.call(
         contract: contract,
         function: getLifeMeaning,
-        params: []
-    );
-    lifeMeaning = result[0];
-    loading =false;
-    notifyListeners();
+        params: [],
+      );
+      print('After calling client.call');
+      lifeMeaning = result[0];
+      loading = false;
+      notifyListeners();
+    } catch (e) {
+      print('Error in getText: $e');
+      // Handle the error gracefully
+    }
   }
 
-  Future<void> setMeaning(BigInt value) async{
+
+
+
+  Future<void> setText(BigInt value) async{
     loading =true;
     notifyListeners();
     await client.sendTransaction(

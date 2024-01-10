@@ -50,7 +50,7 @@ class _HomePageState extends State<HomePage> {
                   onPressed: () async{
                     String message = _messageController.text;
                     try {
-                      await lifeMeaningProvider.setMeaning(BigInt.from(int.parse(message)));
+                      await lifeMeaningProvider.setText(BigInt.from(int.parse(message)));
                     } catch (e) {
                       print("HATA ÇİKTİİİİİ _____ >> ${e}");
                     }
