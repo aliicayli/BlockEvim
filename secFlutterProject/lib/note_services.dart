@@ -15,7 +15,7 @@ class NotesServices extends ChangeNotifier{
   late Web3Client web3client;
   final String rpcUrl = 'http://10.0.2.2:7545';
   final String wsUrl = 'http://10.0.2.2:7545';
-  final String privateKey = '551eb0be1c5de6a8c044be52ffc705b7b0f934af408ba80472bd5904ec6ddb49';
+  final String privateKey = '6b9b3ae43af3c362b7636a2d423369a9e1eaaac1b52f39344b4a3ff43a6bbe56';
 
 
   NotesServices(){
