@@ -51,7 +51,7 @@ namespace TestBlock
 
 
 
-            Test4();
+            GetAccountBalance();
         }
 
 
