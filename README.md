@@ -109,8 +109,4 @@ Future<void> fetchContracts() async{
   }
 ```
 
-## EXTRA
-
-ekstra eklenecek şeyler
-
 
