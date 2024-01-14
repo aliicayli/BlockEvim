@@ -35,21 +35,13 @@ namespace TestBlock
             InitializeComponent();
             var web3 = new Web3("http://localhost:5001");
             //var contractAddress = "0xf8e81D47203A594245E36C48e151709F0C19fBe8";
-
             //var abi = @"[{'inputs':[],'name':'print','outputs':[{'internalType':'string','name':'','type':'string'}],'stateMutability':'pure','type':'function'}]";
             //var contract = web3.Eth.GetContract(abi, contractAddress);
             //var printFunction = contract.GetFunction("print");
             //var a = printFunction.CallAsync<string>().re;
-
             ////var result = printFunction.CallAsync<string>().Result;
-
             //MessageBox.Show(a.ToString());
-
-
             //GetAccountBalance();
-
-
-
 
             GetAccountBalance();
         }
@@ -62,18 +54,13 @@ namespace TestBlock
             ////var balance = web3.Eth.GetBalance.SendRequestAsync("0xbd3Afb0bB76683eCb4225F9DBc91f998713C3b01");
             //var balance = web3.Eth.GetBalance.SendRequestAsync("0x58A616402a8fde6DC983525aC69b3645279a8B94").Result;
             //MessageBox.Show(balance + "togg");
-
             //var web3 = new Web3("HTTP://127.0.0.1:7545");
             //var balance = web3.Eth.GetBalance.SendRequestAsync("0x95625F4ba2B339baf9ebeffb59792CcdD3268113").Result;
             //web3.Eth.baa
             //MessageBox.Show(balance + "togg");
 
-
-
-
             var web3 = new Web3("HTTP://127.0.0.1:7545");
             var contractAddress = "0x86D832B6EC56134E422Dc6A3cE536FE30b228e79";
-
             var secondAbi = @"[{'anonymous':false,'inputs':[{'indexed':false,'internalType':'string','name':'phoneNumber','type':'string'},{'indexed':false,'internalType':'int256','name':'count','type':'int256'}],'name':'PhoneNumberReported','type':'event'},{'inputs':[{'internalType':'string','name':'phoneNumber','type':'string'}],'name':'checkReports','outputs':[{'internalType':'int256','name':'','type':'int256'}],'stateMutability':'view','type':'function'},{'inputs':[{'internalType':'string','name':'phoneNumber','type':'string'}],'name':'reportNumber','outputs':[],'stateMutability':'nonpayable','type':'function'}]";
             //var contract = web3.Eth.GetContract(secondAbi, contractAddress);
             //var printFunction = contract.GetFunction("set").CallAsync<string>().Result;
@@ -84,13 +71,9 @@ namespace TestBlock
             setFunction.SendTransactionAndWaitForReceiptAsync("Togg");
             var transactionHash = setFunction.SendTransactionAsync("hello world");
             var printFunction2 = contract.GetFunction("reportNumber").CallAsync<string>("Test2").Result;
-
-
             var test = contract.GetFunction("reportNumber");
             test.SendTransactionAndWaitForReceiptAsync("test");
-
             //var a = printFunction.SendTransactionAsync("togg").Result;
-
             //MessageBox.Show(a.ToString());
 
 
@@ -169,7 +152,5 @@ namespace TestBlock
             var result = multiplyFunction.CallAsync<string>("asd").Result;
             MessageBox.Show(receipt.ToString());
                 }
-    }
-
-        
+    }        
 }
