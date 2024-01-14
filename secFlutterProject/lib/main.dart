@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sec/ContractService.dart';
+import 'package:sec/CreateContractPage.dart';
 import 'package:sec/note_services.dart';
 import 'ContractDetailPage.dart';
 import 'EvSahibi.dart';
@@ -81,6 +82,7 @@ class _ContractListState extends State<ContractList> {
                 SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateContractPage()));
                     _addNewContract(noteServices);
                   },
                   child: Text('Ekle'),
