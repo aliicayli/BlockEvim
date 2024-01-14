@@ -8,10 +8,10 @@ import 'package:web3dart/credentials.dart';
 import 'package:web3dart/web3dart.dart';
 import 'package:web_socket_channel/io.dart';
 
-import 'Note.dart';
+import 'Contract.dart';
 
 class NotesServices extends ChangeNotifier{
-  List<Note> notes =[];
+  List<Contract> contracts =[];
   late Web3Client web3client;
   final String rpcUrl = 'http://10.0.2.2:7545';
   final String wsUrl = 'http://10.0.2.2:7545';
@@ -40,58 +40,52 @@ class NotesServices extends ChangeNotifier{
   late EthereumAddress contractAdress;
 
   Future<void> getABI() async{
-      String abiFile = await rootBundle.loadString('build/contracts/NotesContract.json');
+      String abiFile = await rootBundle.loadString('build/contracts/Contract.json');
       var jsonAbi = jsonDecode(abiFile);
-      abicode = ContractAbi.fromJson(jsonEncode(jsonAbi['abi']),"NotesContract");
+      abicode = ContractAbi.fromJson(jsonEncode(jsonAbi['abi']),"Contract");
 
       contractAdress = EthereumAddress.fromHex(jsonAbi["networks"]["5777"]["address"]);
     
   }
-
-
   late EthPrivateKey creds;
   Future<void> getCredential() async{
     creds = EthPrivateKey.fromHex(privateKey);
   }
 
-
   late DeployedContract  _deployedContract;
-  late  ContractFunction _createNote;
-  late  ContractFunction _deleteNote;
-  late  ContractFunction _notes;
-  late  ContractFunction _noteCount;
+  late  ContractFunction _createContract;
+  late  ContractFunction _contracts;
+  late  ContractFunction _contractCount;
 
   Future<void> getDeployedContract() async{
     _deployedContract = DeployedContract(abicode, contractAdress);
-    _createNote = _deployedContract.function('createNote');
-    _deleteNote = _deployedContract.function('deleteNote');
-    _notes = _deployedContract.function('notes');
-    _noteCount = _deployedContract.function('noteCount');
+    _createContract = _deployedContract.function('createContract');
+    _contracts = _deployedContract.function('contracts');
+    _contractCount = _deployedContract.function('count');
 
-    await fetchNotes();
+    await fetchContracts();
   }
 
 
-  Future<void> fetchNotes() async{
+  Future<void> fetchContracts() async{
     List totalTaskList = await web3client.call(
         contract: _deployedContract,
-        function: _noteCount,
+        function: _contractCount,
         params: [],
     );
 
+    print(" gelen veri ------ >>> "+totalTaskList[0].toString());
     int totalTaskLen = totalTaskList[0].toInt();
-    notes.clear();
-
+    contracts.clear();
     for(var i =0; i<totalTaskLen; i++){
       var temp = await web3client.call(
           contract: _deployedContract,
-          function: _notes,
+          function: _contracts,
           params: [BigInt.from(i)]
       );
-
       if(temp[1] != ""){
-        notes.add(
-            Note(
+        contracts.add(
+            Contract(
               (temp[0] as BigInt).toInt(),
               temp[1],
               temp[2]
@@ -103,28 +97,23 @@ class NotesServices extends ChangeNotifier{
     notifyListeners();
   }
 
-  Future<void> addNote(String title, String description) async {
-    try {
+  Future<void> addContract( String contractJsonString) async {
+    final transaction = Transaction.callContract(
+      contract: _deployedContract,
+      function: _createContract,
+      parameters: [contractJsonString],
+    );
 
-      final transaction = Transaction.callContract(
-        contract: _deployedContract,
-        function: _createNote,
-        parameters: [title, description],
-      );
+    final response = await web3client.sendTransaction(creds, transaction);
 
-      final response = await web3client.sendTransaction(creds, transaction);
-
-      if (response != null) {
-        print('Transaction successful');
-      } else {
-        print('Transaction failed: Response is null');
-      }
-    } catch (e) {
-      print('Transaction failed---->>> $e');
+    if (response != null) {
+      print('--- >> Transaction tamalandı');
+    } else {
+      print('HATAAA: Response is null');
     }
 
     notifyListeners();
-    fetchNotes();
+    fetchContracts();
   }
 
 
@@ -136,13 +125,13 @@ class NotesServices extends ChangeNotifier{
         creds,
         Transaction.callContract(
             contract: _deployedContract,
-            function: _createNote,
+            function: _createContract,
             parameters: [title, description],
         )
     );
 
     notifyListeners();
-    fetchNotes();
+    fetchContracts();
 
     }
 

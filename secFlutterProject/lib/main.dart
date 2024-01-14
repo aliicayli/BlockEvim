@@ -4,8 +4,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sec/ContractService.dart';
-import 'package:sec/note_services.dart';
+import 'package:sec/contract_services.dart';
 import 'ContractDetailPage.dart';
+import 'CreateContractPage.dart';
 import 'EvSahibi.dart';
 import 'Kira.dart';
 import 'Kiraci.dart';
@@ -80,8 +81,9 @@ class _ContractListState extends State<ContractList> {
                 ),
                 SizedBox(width: 10),
                 ElevatedButton(
-                  onPressed: () {
-                    _addNewContract(noteServices);
+                  onPressed: () async{
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateContractPage()));
+                    await noteServices.addContract( "Example JSON data");
                   },
                   child: Text('Ekle'),
                 ),
@@ -94,9 +96,7 @@ class _ContractListState extends State<ContractList> {
     );
   }
 
-  Future<void> _addNewContract(NotesServices noteServices)  async {
-    await noteServices.addNote("title", "description");
-  }
+
 }
 
 
