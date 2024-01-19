@@ -10,7 +10,7 @@ import 'package:web_socket_channel/io.dart';
 
 import 'Contract.dart';
 
-class NotesServices extends ChangeNotifier{
+class ContractServices extends ChangeNotifier{
   List<Contract> contracts =[];
   late Web3Client web3client;
   final String rpcUrl = 'http://10.0.2.2:7545';
@@ -18,7 +18,7 @@ class NotesServices extends ChangeNotifier{
   final String privateKey = '6b9b3ae43af3c362b7636a2d423369a9e1eaaac1b52f39344b4a3ff43a6bbe56';
 
 
-  NotesServices(){
+  ContractServices(){
     init();
   }
 
@@ -116,24 +116,6 @@ class NotesServices extends ChangeNotifier{
     fetchContracts();
   }
 
-
-
-
-
-  Future<void> addNote2(String title, String description) async {
-    await web3client.sendTransaction(
-        creds,
-        Transaction.callContract(
-            contract: _deployedContract,
-            function: _createContract,
-            parameters: [title, description],
-        )
-    );
-
-    notifyListeners();
-    fetchContracts();
-
-    }
 
 
 }

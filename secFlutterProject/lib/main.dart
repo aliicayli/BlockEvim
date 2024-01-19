@@ -2,6 +2,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:sec/ContractService.dart';
 import 'package:sec/contract_services.dart';
@@ -13,13 +14,16 @@ import 'Kiraci.dart';
 import 'KiralamaSozlesmesi.dart';
 import 'Mulkiyet.dart';
 import 'Ozellikler.dart';
+import 'RentalInfo.dart';
 import 'Taraflar.dart';
+import 'ethereum_utils.dart';
 
-void main() {
-  HttpOverrides.global = new MyHttpOverrides();
+Future<void> main() async {
+
+  await dotenv.load(fileName: ".env");
   runApp(
       ChangeNotifierProvider(
-        create: (context)=> NotesServices(),
+        create: (context)=> ContractServices(),
         child: MyApp(),
       )
   );
@@ -29,10 +33,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
-        appBar: AppBar(
-          title: Text('Kira Sözleşmeleri'),
-        ),
         body: ContractList(),
       ),
     );
@@ -45,52 +47,160 @@ class ContractList extends StatefulWidget {
 }
 
 class _ContractListState extends State<ContractList> {
-  List<KiralamaSozlesmesi> contracts = ContractService().getContracts();
-  TextEditingController _newContractController = TextEditingController();
+  List<RentalInfo> propertyList = [];
+  String _data = "";
+  EthereumUtils ethUtils = EthereumUtils();
+
+  @override
+  void initState() {
+    ethUtils.initial();
+    super.initState();
+  }
+
+
+  void _handleButtonTap() {
+    ethUtils.getRentalInfo().then((value) {
+      RentalInfo propertyInfo = _parseDataList(value);
+      propertyList.add(propertyInfo);
+      setState(() {});
+    });
+  }
+
+  RentalInfo _parseDataList(List dataList) {
+    return RentalInfo(
+      ownerName: dataList[0],
+      tenantName: dataList[1],
+      propertyAddress: dataList[2],
+      propertyFeature: dataList[3],
+      roomCount: dataList[4],
+      squareMeters: dataList[5],
+      rentAmount: dataList[6],
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
-
-    var noteServices = context.watch<NotesServices>();
-
-
     return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: contracts.length,
-              itemBuilder: (context, index) {
-                return ContractCard(contract: contracts[index]);
-              },
+      appBar: AppBar(
+        title: Text(
+          'Blok Evim',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Color(0xff165997),
+        actions: [
+          GestureDetector(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateContractPage()));
+            },
+            child: Container(
+              margin: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Color(0xff165997),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.white, // Set border color
+                  width: 1, // Set border width
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Text(
+                  'Yeni Sözleşme',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
             ),
           ),
+        ],
+      ),
 
 
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _newContractController,
-                    decoration: InputDecoration(
-                      hintText: 'Yeni sözleşme ekleyin',
+
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (var property in propertyList)
+                Card(
+                  margin: EdgeInsets.all(10),
+                  elevation: 5,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  color: Color(0xffeeeff4), // Background color for the card
+                  child: Padding(
+                    padding: EdgeInsets.all(15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildInfoRow('Owner', property.ownerName, Icons.person, Colors.blue),
+                        _buildInfoRow('Tenant', property.tenantName, Icons.person, Colors.green),
+                        _buildInfoRow('Address', property.propertyAddress, Icons.location_on, Colors.red),
+                        _buildInfoRow('Feature', property.propertyFeature, Icons.home, Colors.orange),
+                        _buildInfoRow('Room Count', property.roomCount.toString(), Icons.hotel, Colors.purple),
+                        _buildInfoRow('Square Meters', property.squareMeters.toString(), Icons.crop_square, Colors.teal),
+                        _buildInfoRow('Rent Amount', ' ${property.rentAmount}', Icons.attach_money, Colors.indigo),
+                      ],
                     ),
                   ),
                 ),
-                SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: () async{
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateContractPage()));
-                    await noteServices.addContract( "Example JSON data");
-                  },
-                  child: Text('Ekle'),
-                ),
-              ],
+              SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+
+      floatingActionButton: GestureDetector(
+        onTap: _handleButtonTap,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20), // Set rounded corners
+            color: Color(0xff03a8d2), // Set dark green color
+          ),
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          child: Text(
+            'Get Last Contract',
+            style: TextStyle(
+              color: Colors.white, // Set text color
+              fontWeight: FontWeight.bold,
             ),
           ),
+        ),
+      )
+    );
+  }
 
+  Widget _buildInfoRow(String label, String value, IconData icon, Color iconColor) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(icon, color: iconColor), // Set icon color
+          SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                value,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -100,41 +210,5 @@ class _ContractListState extends State<ContractList> {
 }
 
 
-class ContractCard extends StatelessWidget {
-  final KiralamaSozlesmesi contract;
 
-  ContractCard({required this.contract});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.all(10),
-      child: ListTile(
-        leading: Icon(Icons.house_outlined, size: 40, color: Colors.blue),
-        title: Text('Ev Sahibi: ${contract.taraflar.evSahibi.ad}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        subtitle: Text('Kiracı: ${contract.taraflar.kiraci.ad}', style: TextStyle(fontSize: 14)),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ContractDetailPage(contract: contract)),
-          );
-        },
-      ),
-    );
-  }
-}
-
-
-
-
-
-class MyHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback = (X509Certificate cert, String host, int port) {
-        return true; // This is where you define the logic for handling the certificate validation
-      };
-  }
-}
 

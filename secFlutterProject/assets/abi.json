@@ -1,0 +1,138 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_ownerName",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_tenantName",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_propertyAddress",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_propertyFeature",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_roomCount",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_squareMeters",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_rentAmount",
+        "type": "string"
+      }
+    ],
+    "name": "setRentalInfo",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getRentalInfo",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "ownerName",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "tenantName",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "propertyAddress",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "propertyFeatures",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "roomCount",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "squareMeters",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "rentAmount",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct basicDapp.RentalInfo",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "rentalInfo",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "ownerName",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "tenantName",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "propertyAddress",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "propertyFeatures",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "roomCount",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "squareMeters",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "rentAmount",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
