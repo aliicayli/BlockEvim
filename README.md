@@ -10,8 +10,8 @@ The application allows users to view existing contracts, create new contracts, a
 
 - View a list of existing rental contracts.
 - Create new rental contracts and store them on the Ethereum blockchain.
-- Save contract details in  JSON string format.
- EXAMPLE : {"taraflar":{"evSahibi":{"ad":"Ali ","adres":"Kötekli Mah. Kyk Erkek Yurdu ","telefon":"05441414445"},"kiraci":{"ad":"Enes","adres":"Pamukkale Mahallesi, 24. Sok. DENIZLI","telefon":"0577874566"}},"mulkiyet":{"adres":"amukkale Mahallesi, 24. Sok. DENIZLI","ozellikler":{"odaSayisi":4,"metrekare":130}},"kira":{"bedel":12000.0,"odemeSikligi":"ay","odemeSekli":"nakit","gecikmeCeza":200.0}}
+- Save contract details in string format.
+ EXAMPLE : "Aylin Uysal, Barış Tekin ,Göktürk Mahallesi/123.Sokak/No: 45/Kat:3/Daire: 12, Modern Bahçeli Villa, 5+2, 350, 9000TL"
 - Retrieve contract details from the Ethereum blockchain.
 - User-friendly interface for seamless contract management.
 
@@ -20,7 +20,7 @@ Caption: Screenshot of the result of `truffle migrate` command.
 ![Contract List](https://drive.usercontent.google.com/download?id=1dNBJ-jdw-dNG04-agsUKds15C4KcK3cr&export=download&authuser=0&confirm=t&uuid=07c99a2b-e8c5-42e0-97dd-d5e2270f805a&at=APZUnTWU6bEI1k_WGSVeNiVsgBQ4:1705237150946)
 
 Caption: Screenshot of pages.
-![Create Contract](https://drive.usercontent.google.com/download?id=123YQ3vp6SixklMtA997W5NHgYWvbRFOq&export=download&authuser=0&confirm=t&uuid=68851331-27ad-4b51-a5e7-30b5db30585f&at=APZUnTUlE-89guBTSWEXIUVCVD56:1705237152084)
+![Create Contract](https://github.com/aliicayli/BlockEvim/blob/main/secFlutterProject/ScreenShots2.png)
 
 
 ## Solidity Smart Contract
@@ -31,81 +31,82 @@ The project includes a simple Ethereum smart contract written in Solidity. The s
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.8.17;
 
-contract Contract {
-  uint256 public count = 0;
-  struct ContractStruct {
-    uint256 id;
-    string contractDetailJSON;
-  }
+contract basicDapp {
+    struct RentalInfo {
+        string ownerName;
+        string tenantName;
+        string propertyAddress;
+        string propertyFeatures;
+        string roomCount;
+        string squareMeters;
+        string rentAmount;
+    }
 
-  mapping(uint256 => ContractStruct) public contracts;
+    RentalInfo public rentalInfo;
 
+    function setRentalInfo(
+        string memory _ownerName,
+        string memory _tenantName,
+        string memory _propertyAddress,
+        string memory _propertyFeature,
+        string memory _roomCount,
+        string memory _squareMeters,
+        string memory _rentAmount
+    ) public {
+        rentalInfo = RentalInfo(
+            _ownerName,
+            _tenantName,
+            _propertyAddress,
+            _propertyFeature,
+            _roomCount,
+            _squareMeters,
+            _rentAmount
+        );
+    }
 
-  event ContractCreated(uint256 id, string contractDetailJSON);
-
-
-  function createContract(string memory contractDetailJSON) public {
-    contracts[count] = ContractStruct(count,contractDetailJSON);
-    emit ContractCreated(count,contractDetailJSON);
-    count++;
-  }
+    function getRentalInfo() public view returns (RentalInfo memory) {
+        return rentalInfo;
+    }
 }
 ```
 
 ## Dart methods to get and set contract
 
 ```dart
-  Future<void> addContract(String title, String description) async {
-    try {
-
-      final transaction = Transaction.callContract(
-        contract: _deployedContract,
-        function: _createContract,
-        parameters: [title, description],
-      );
-
-      final response = await web3client.sendTransaction(creds, transaction);
-
-      if (response != null) {
-        print('--- >> Transaction tamalandı');
-      } else {
-        print('HATAAA: Response is null');
-      }
-    } catch (e) {
-      print('Transaction failed---->>> $e');
-    }
-
-    notifyListeners();
-    fetchContracts();
+   Future getRentalInfo() async {
+    final contract = await getDeployedContract();
+    final etherFunction = contract.function("getRentalInfo");
+    final result = await web3client.call(contract: contract, function: etherFunction, params: []);
+    List<dynamic> res = result;
+    return res[0];
   }
 
-# -----------------------------------------------------------
-Future<void> fetchContracts() async{
-    List totalTaskList = await web3client.call(
-        contract: _deployedContract,
-        function: _contractCount,
-        params: [],
-    );
+  Future<String> setRentalInfo({required String ownerName, required String tenantName, required String propertyAddress,
+    required String propertyFeature, required String roomCount, required String squareMeters, required String rentAmount,
+  }) async {
+    EthPrivateKey privateKeyCred = EthPrivateKey.fromHex(dotenv.env['METAMASK_PRIVATE_KEY']!);
+    DeployedContract contract = await getDeployedContract();
+    final etherFunction = contract.function("setRentalInfo");
 
-    print(" gelen veri ------ >>> "+totalTaskList[0].toString());
-    int totalTaskLen = totalTaskList[0].toInt();
-    contracts.clear();
-    for(var i =0; i<totalTaskLen; i++){
-      var temp = await web3client.call(
-          contract: _deployedContract,
-          function: _contracts,
-          params: [BigInt.from(i)]
-      );
-      if(temp[1] != ""){
-        contracts.add(
-            Contract(
-              (temp[0] as BigInt).toInt(),
-              temp[1],
-              temp[2]
-            )
-        );
-      }
-    }
+    final result = await web3client.sendTransaction(
+      privateKeyCred,
+      Transaction.callContract(
+        contract: contract,
+        function: etherFunction,
+        parameters: [ownerName, tenantName, propertyAddress, propertyFeature, roomCount, squareMeters, rentAmount,],
+        maxGas: 100000,
+      ),
+      chainId: 4,
+      fetchChainIdFromNetworkId: false,
+    );
+    return result;
+  }
+
+
+  Future<DeployedContract> getDeployedContract() async {
+    String abi = await rootBundle.loadString("assets/abi.json");
+    final contract = DeployedContract(ContractAbi.fromJson(abi, "BasicDapp"), EthereumAddress.fromHex(contractAddress!));
+    return contract;
   }
 ```
 
